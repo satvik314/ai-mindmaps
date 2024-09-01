@@ -1,113 +1,206 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Sparkles, Brain } from 'lucide-react';
+import MindMap from './components/MindMap';
+
+export default function Page() {
+  const [topic, setTopic] = useState('');
+  const [mindmapData, setMindmapData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTopic(e.target.value);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!topic.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/generate-mindmap', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          `Server error (${response.status}): ${errorData.message || response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message || 'An error occurred while generating the mindmap.');
+      }
+      
+      console.log('Received mindmap data:', data);
+      setMindmapData(data);
+    } catch (error) {
+      console.error('Error generating mindmap:', error);
+      setError(
+        `${(error as Error).message}\n\nPlease check your server logs for more details.`
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 text-gray-900">
+      <div className="max-w-6xl mx-auto p-6 space-y-8">
+        <motion.div
+          className="relative"
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-5xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
+            Mindmap Generator
+          </h1>
+          <motion.div
+            className="absolute -top-10 -left-10 w-20 bg-blue-200 rounded-full opacity-50"
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          />
+          <motion.div
+            className="absolute -bottom-10 -right-10 w-16 h-16 bg-purple-200 rounded-full opacity-50"
+            animate={{
+              scale: [1, 1.3, 1],
+              rotate: [0, -180, -360],
+            }}
+            transition={{
+              duration: 7,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          />
+        </motion.div>
+        
+        <motion.form 
+          onSubmit={handleSubmit}
+          className="flex items-center justify-center space-x-4 relative"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <input
+            type="text"
+            value={topic}
+            onChange={handleInputChange}
+            placeholder="Enter a topic for your mindmap"
+            className="flex-grow text-lg p-4 rounded-full border-2 border-blue-400 focus:border-purple-600 focus:ring-2 focus:ring-purple-600 shadow-lg"
+          />
+          <button 
+            type="submit" 
+            disabled={isLoading} 
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-full p-4 flex items-center shadow-lg transform hover:scale-105 transition-transform duration-200"
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+            {isLoading ? 'Generating...' : <><Sparkles className="mr-2" /> Generate</>}
+          </button>
+          <motion.div
+            className="absolute -z-10 w-full h-full bg-gradient-to-r from-blue-300 to-purple-300 rounded-full filter blur-xl opacity-30"
+            animate={{
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          />
+        </motion.form>
+        
+        {error && (
+          <motion.div 
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative shadow-md"
+            role="alert"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <strong className="font-bold">Error: </strong>
+            <span className="block sm:inline whitespace-pre-line">{error}</span>
+            <p className="mt-2">
+              Troubleshooting steps:
+              <ol className="list-decimal list-inside ml-4">
+                <li>Check your server logs for more detailed error information.</li>
+                <li>Ensure your API route (/api/generate-mindmap) is correctly implemented.</li>
+                <li>Verify that all required dependencies are installed and up-to-date.</li>
+                <li>Check for any environment variables or configuration issues.</li>
+              </ol>
+            </p>
+          </motion.div>
+        )}
+        
+        <motion.div 
+          className="mindmap-container border-4 border-blue-400 rounded-2xl p-8 bg-white shadow-2xl relative overflow-hidden"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+        >
+          <motion.div
+            className="absolute -top-10 -left-10 w-40 h-40 bg-blue-100 rounded-full opacity-50"
+            animate={{
+              scale: [1, 1.2, 1],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 10,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          />
+          <motion.div
+            className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-100 rounded-full opacity-50"
+            animate={{
+              scale: [1, 1.3, 1],
+              rotate: [0, -180, -360],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              repeatType: "reverse"
+            }}
+          />
+          {isLoading ? (
+            <div className="text-center relative z-10">
+              <motion.div
+                animate={{
+                  rotate: 360,
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "linear"
+                }}
+              >
+                <Brain size={48} className="text-blue-500 mx-auto" />
+              </motion.div>
+              <p className="mt-2 text-lg font-semibold">Your mindmap is cooking...</p>
+            </div>
+          ) : mindmapData ? (
+            <MindMap data={mindmapData} />
+          ) : (
+            <p className="text-center text-gray-500 relative z-10">Enter a topic and click "Generate" to create a mindmap.</p>
+          )}
+        </motion.div>
       </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
