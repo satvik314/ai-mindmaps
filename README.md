@@ -4,6 +4,8 @@
 
 Mindmap Generator is a dynamic web application that creates visual mindmaps based on user-input topics. It leverages AI to generate comprehensive, hierarchical representations of ideas, making it an excellent tool for brainstorming, studying, or organizing thoughts.
 
+![Demo of Mindmap Generator](public/images/demo.png)
+
 ## Features
 
 - **AI-Powered Mindmap Generation**: Enter any topic, and the app will create a detailed mindmap.
