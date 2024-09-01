@@ -28,12 +28,12 @@ Mindmap Generator is a dynamic web application that creates visual mindmaps base
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/mindmap-generator.git
+   git clone https://github.com/satvik314/ai-mindmaps.git
    ```
 
 2. Navigate to the project directory:
    ```
-   cd mindmap-generator
+   cd ai-mindmaps
    ```
 
 3. Install dependencies:
@@ -42,7 +42,7 @@ Mindmap Generator is a dynamic web application that creates visual mindmaps base
    ```
 
 4. Set up environment variables:
-   Create a `.env.local` file in the root directory and add necessary environment variables.
+   Create a `.env.local` file in the root directory and add `GROQ_API_KEY`
 
 5. Run the development server:
    ```
