@@ -1,40 +1,49 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { generateObject } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
-import { z } from 'zod';
+import { NextResponse } from 'next/server';
 
-const groq = createOpenAI({
-  baseURL: 'https://api.groq.com/openai/v1',
-  apiKey: process.env.GROQ_API_KEY,
-});
+// This is a mock function. Replace it with your actual AI-powered mindmap generation logic
+function generateMindmap(topic: string) {
+  return {
+    root: {
+      title: topic,
+      description: `This is a mindmap about ${topic}`,
+      children: [
+        {
+          title: `Aspect 1 of ${topic}`,
+          description: 'Description of aspect 1',
+          children: [
+            { title: 'Sub-aspect 1.1', description: 'Description of sub-aspect 1.1' },
+            { title: 'Sub-aspect 1.2', description: 'Description of sub-aspect 1.2' },
+          ]
+        },
+        {
+          title: `Aspect 2 of ${topic}`,
+          description: 'Description of aspect 2',
+          children: [
+            { title: 'Sub-aspect 2.1', description: 'Description of sub-aspect 2.1' },
+            { title: 'Sub-aspect 2.2', description: 'Description of sub-aspect 2.2' },
+          ]
+        },
+      ]
+    }
+  };
+}
 
-const MindmapNodeSchema: z.ZodType<any> = z.lazy(() => z.object({
-  title: z.string(),
-  description: z.string().nullable(),
-  children: z.array(MindmapNodeSchema).default([])
-}));
-
-const MindmapSchema = z.object({
-  title: z.string(),
-  root: MindmapNodeSchema
-});
-
-export async function POST(req: NextRequest) {
-  const { topic } = await req.json();
-  console.log('Received topic:', topic);
-
+export async function POST(request: Request) {
   try {
-    const { object: mindmapData } = await generateObject({
-      model: groq('llama-3.1-70b-versatile'),
-      system: "You are an AI assistant specialized in creating detailed and informative mindmaps. When given a topic, generate a structured mindmap as a JSON object. Include descriptive titles and informative descriptions for each node. Aim for depth and breadth in the mindmap structure.",
-      prompt: `Create a comprehensive and detailed mindmap for the topic: "${topic}". Include a main title, a root node, and at least three levels of child nodes where applicable. Provide informative descriptions for each node.`,
-      schema: MindmapSchema,
-    });
+    const { topic } = await request.json();
+    
+    if (!topic) {
+      return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
+    }
 
-    console.log('Generated mindmap data:', JSON.stringify(mindmapData, null, 2));
+    const mindmapData = generateMindmap(topic);
+    
     return NextResponse.json(mindmapData);
   } catch (error) {
-    console.error('Error generating mindmap:', error);
-    return NextResponse.json({ error: 'Failed to generate mindmap' }, { status: 500 });
+    console.error('Error in generate-mindmap API:', error);
+    return NextResponse.json(
+      { error: 'An error occurred while generating the mindmap.' },
+      { status: 500 }
+    );
   }
 }

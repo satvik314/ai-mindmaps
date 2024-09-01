@@ -17,10 +17,12 @@ Mindmap Generator is a dynamic web application that creates visual mindmaps base
 ## Technology Stack
 
 - **Frontend**: React with Next.js (App Router)
+- **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 - **API**: Next.js API Routes
+- **Visualization**: D3.js
 
 ## Installation
 
@@ -67,7 +69,13 @@ Mindmap Generator is a dynamic web application that creates visual mindmaps base
 
 ## Styling
 
-The application uses Tailwind CSS for styling, with custom gradients and animations for a modern, engaging look.
+The application uses Tailwind CSS for styling, with custom gradients and animations for a modern, engaging look. Special attention has been given to color contrast to ensure readability and accessibility:
+
+- The main content uses dark text on light backgrounds for optimal readability.
+- The mindmap component uses a color scheme that ensures sufficient contrast between nodes and connections.
+- Interactive elements like buttons have distinct hover and active states for better user feedback.
+
+If you notice any issues with color contrast, please report them in the issues section of this repository.
 
 ## Error Handling
 

@@ -33,13 +33,13 @@ export default function Page() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          `Server error (${response.status}): ${errorData.message || response.statusText}`
+          `Server error (${response.status}): ${errorData.error || response.statusText}`
         );
       }
 
       const data = await response.json();
       if (data.error) {
-        throw new Error(data.error.message || 'An error occurred while generating the mindmap.');
+        throw new Error(data.error || 'An error occurred while generating the mindmap.');
       }
       
       console.log('Received mindmap data:', data);
@@ -197,7 +197,7 @@ export default function Page() {
           ) : mindmapData ? (
             <MindMap data={mindmapData} />
           ) : (
-            <p className="text-center text-gray-500 relative z-10">Enter a topic and click "Generate" to create a mindmap.</p>
+            <p className="text-center text-gray-500 relative z-10">Enter a topic and click &quot;Generate&quot; to create a mindmap.</p>
           )}
         </motion.div>
       </div>

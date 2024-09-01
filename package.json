@@ -20,9 +20,11 @@
     "react-d3-tree": "^3.6.2",
     "react-dom": "^18",
     "react-force-graph": "^1.44.4",
+    "react-force-graph-3d": "^1.24.3",
     "react-mindmap": "^2.1.6"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
